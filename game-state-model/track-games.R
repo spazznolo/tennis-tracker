@@ -2,6 +2,9 @@
 
 library(tidyverse)
 
+tibble(
+  game-chunk = 'clay-m-2012'
+)
 
 clay-m-2012-0 <- rep(0, 1600)
 
@@ -30,6 +33,26 @@ clay-m-2012-112 <- rep(0, 1600)
 clay-m-2012-112[c(0:96, 1006:1052)] <- 1
 
 clay-m-2012-124 <- rep(0, 1600)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 in_play_set <-
   tibble(

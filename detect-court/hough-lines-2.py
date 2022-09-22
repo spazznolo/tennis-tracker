@@ -11,9 +11,7 @@ from skimage.morphology import skeletonize
 #img = cv2.imread("assets/game-frames/hard-m-2021.mp4/frame_13_202.jpg")
 img = cv2.imread("assets/game-frames/clay-m-2012-71-870.jpg")
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-kernel_size = 1
-blur_gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)
-edges = cv2.Canny(blur_gray, 50, 100, apertureSize = 3)
+edges = cv2.Canny(gray, 50, 100, apertureSize = 3)
 
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 lower_white = np.array([0,0,250], dtype=np.uint8)
@@ -33,20 +31,20 @@ for line in lines:
 
     df1 = pd.concat([df1, pd.DataFrame(np.reshape(line[0], (1, 4)), columns = ['x1', 'y1', 'x2', 'y2'])])
     
-    # if x1 == x2 or x1 < 10 or y1 < 100: 
-    #     continue
-
-    if abs((y2 - y1)/(x2 - x1)) > 1.5 and abs((y2 - y1)/(x2 - x1)) < 3 and length > 200:
-        cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 1)
-
-    elif abs((y2 - y1)/(x2 - x1)) < 0.02 and ((x1 > 44 and x1 < 685) and (x2 < 685 and x2 > 44)) and ((y1 > 110 and y1 < 120) or (y1 > 400 and y1 < 420)):
-        cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 1)
-
-    else:
+    if x1 == x2 or x1 < 10 or y1 < 100: 
         continue
 
+    elif abs((y2 - y1)/(x2 - x1)) > 1.5 and abs((y2 - y1)/(x2 - x1)) < 3 and length > 200:
+        cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 5)
+
+    elif abs((y2 - y1)/(x2 - x1)) < 0.02 and ((x1 > 44 and x1 < 685) and (x2 < 685 and x2 > 44)):
+        cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 5)
+
+    else:
+        continue #cv2.line(img, (x1, y1), (x2, y2), (255, 0, 0), 5)
+
 #skeleton = skeletonize(blank_image)
-df1.to_csv('assets/temp/hough_lines.csv')
+df1.to_csv('hough_lines.csv')
 cv2.imwrite('/Users/ada/Documents/projects/spazznolo.github.io/figs/hough-line-ex-2.jpg',img)
 cv2.imshow("Detected Lines (in red) - Standard Hough Line Transform", img)
 cv2.waitKey(0)
