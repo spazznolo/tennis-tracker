@@ -8,23 +8,22 @@ houghs <-
     x_max = ifelse(x1 > x2, x1, x2),
     y_min = ifelse(y1 < y2, y1, y2),
     y_max = ifelse(y1 > y2, y1, y2),
-    slope_y = (y_max - y_min)/(x_max -x_min),
+    slope = (y2 - y1)/(x2 -x1),
     length = sqrt((x_max - x_min)^2 + (y_max - y_min)^2)
-    ) %>%
-  select(x_min:length)
+    )
 
 length_lines <-
   houghs %>% 
-  filter(abs(slope_y) > 1.5, abs(slope_y) < 3, length > 250)
+  filter(abs(slope) > 1.5, abs(slope) < 3, length > 100)
 
 hist(length_lines$length)
 
 width_lines <-
   houghs %>%
   filter(
-    abs(slope_y) < 0.1 &
-      ((y_max < max(length_lines$y_max) + 2 & y_max > max(length_lines$y_max) - 2) |
-         (y_min < min(length_lines$y_min) + 2 & y_min > min(length_lines$y_min) - 2)))
+    abs(slope) < 0.15 & length > 25 & x_min > 180 & x_max < 800 &
+      ((y_max < max(length_lines$y_max) + 10 & y_max > max(length_lines$y_max) - 10) |
+         (y_min < min(length_lines$y_min) + 5 & y_min > min(length_lines$y_min) - 5)))
 
 width_lines %>%
   ggplot() +
