@@ -2,15 +2,65 @@
 library(tidyverse)
 
 houghs <- 
-  read_csv('~/Documents/tennis-tracker/assets/temp/hough_lines.csv') %>%
-  mutate(
-    x_min = ifelse(x1 < x2, x1, x2),
-    x_max = ifelse(x1 > x2, x1, x2),
-    y_min = ifelse(y1 < y2, y1, y2),
-    y_max = ifelse(y1 > y2, y1, y2),
-    slope = (y2 - y1)/(x2 -x1),
-    length = sqrt((x_max - x_min)^2 + (y_max - y_min)^2)
-    )
+  read_csv('~/Documents/tennis-tracker/assets/temp/hough_lines.csv')
+
+lengthwise <-
+  houghs %>%
+  filter(!is.na(clust)) 
+
+widthwise <-
+  houghs %>%
+  filter(abs(slope) < 0.1)
+
+widtwise %>%
+  ggplot() +
+  geom_histogram(aes(y_min)) +
+  facet_wrap(~image)
+
+houghs %>% 
+  #filter(grepl('hard', image)) %>%
+  count(image)
+      
+start_ = Sys.time()  
+
+for (i in 1:26) {
+  
+  dist_mat <- dist(houghs %>% filter(grepl('grass-w-2018-49-223.jpg', image)) %>% select(abs_slope), method = 'euclidean')
+  hclust_avg <- hclust(dist_mat, method = 'average')
+  clusts <- cutree(hclust_avg, h = 0.15)
+  clusts
+  plot(hclust_avg)
+  houghs %>% filter(grepl('grass-w-2018-49-1054.jpg', image)) 
+  
+}
+
+Sys.time() - start_
+
+length(list.files('~/Documents/tennis-tracker/assets/train/on'))
+
+install.packages('PlaneGeometry')
+library(PlaneGeometry)
+
+line1 <- Line$new(A = c(626, 293), B = c(663,387))
+line2 <- Line$new(A = c(0,2), B = c(4,2))
+intersectionLineLine(line1, line2)
+
+
+houghs %>% 
+  filter(grepl('clay-m-2009-45-250.jpg', image), abs_slope < 0.1) %>%
+  ggplot() +
+  geom_histogram(aes(y_min))
+
+
+
+
+
+
+houghs %>% 
+  select(-1) %>%
+  mutate(idx = 1:n()) %>%
+  filter(image == 'grass-w-2018-42-1496.jpg', abs(slope) < 1.75, abs(slope) > 1.5)
+
 
 length_lines <-
   houghs %>% 

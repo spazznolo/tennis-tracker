@@ -6,7 +6,7 @@ import pandas as pd
 import cv2
 
 # load the image
-img = cv2.imread("assets/game-frames/grass-m-2015-113-600.jpg")
+img = cv2.imread("assets/game-frames/hard-w-2020-70-1319.jpg")
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 kernel_size = 1
 blur_gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)
