@@ -4,20 +4,23 @@ from matplotlib import pyplot as plt
 import cv2
 
 kernel_size = 1
-kernel_dilate = np.ones((3, 3), 'uint8')
-kernel = np.ones((5, 5), 'uint8')
-
-fgbg = cv2.createBackgroundSubtractorMOG2()
+kernel_dilate = np.ones((5, 5), 'uint8')
+kernel = np.ones((3, 3), 'uint8')
+kernel_open = np.ones((3, 3), 'uint8')
+fgbg = cv2.createBackgroundSubtractorMOG2(history=5, detectShadows=True)
 
 old = "assets/game-frames/hard-m-2019-128-" # 800-850
 
-i = 727
-while i < 757:
+i = 400
+while i < 430:
     
-    current_frame = cv2.imread("assets/game-frames/hard-m-2019-128-" + str(i - 1) + ".jpg")
-    previous_frame = cv2.imread("assets/game-frames/hard-m-2019-128-" + str(i) + ".jpg")
+    current_frame = cv2.imread("assets/game-frames/hard-w-2022-67-" + str(i) + ".jpg")
+    previous_frame = cv2.imread("assets/game-frames/hard-w-2022-67-" + str(i-1) + ".jpg")
+    previous_frame_1 = cv2.imread("assets/game-frames/hard-w-2022-67-" + str(i-2) + ".jpg")
 
+    fgmask = fgbg.apply(previous_frame_1)
     fgmask = fgbg.apply(previous_frame)
+    fgmask = fgbg.apply(current_frame)
     fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
 
     current_frame_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
@@ -29,8 +32,8 @@ while i < 757:
     # frame_diff = cv2.absdiff(current_blur_gray, previous_blur_gray)
     #test = cv2.adaptiveThreshold(frame_diff, 100, blockSize=9, adaptiveMethod=cv2.ADAPTIVE_THRESH_MEAN_C, thresholdType=cv2.THRESH_BINARY, C=5) 
     
-    #dilate_img = cv2.dilate(frame_diff, kernel_dilate, iterations=2)
-    closing = cv2.morphologyEx(frame_diff, cv2.MORPH_CLOSE, kernel)
+    dilate_img = cv2.dilate(frame_diff, kernel_dilate, iterations=3)
+    closing = cv2.morphologyEx(dilate_img, cv2.MORPH_OPEN, kernel_open)
     median_blur = cv2.medianBlur(closing, 3)
     
     # Set up the detector with default parameters.
@@ -43,16 +46,16 @@ while i < 757:
     # params.maxThreshold = 50
 
     params.filterByArea = True
-    params.minArea = 500
+    params.minArea = 10
 
     params.filterByCircularity = True
-    params.minCircularity = 0.01
+    params.minCircularity = 0.20
 
     params.filterByInertia = True
-    params.minInertiaRatio = 0.01
+    params.minInertiaRatio = 0.08
 
     params.filterByConvexity = True
-    params.minConvexity = 0.01
+    params.minConvexity = 0.2
 
     #params.minDistBetweenBlobs = 100
 
@@ -60,15 +63,19 @@ while i < 757:
     keypoints = detector.detect(closing)
     im_with_keypoints = cv2.drawKeypoints(closing, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     
-    contours = cv2.findContours(median_blur, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    contours = contours[0] if len(contours) == 2 else contours[1]
-    result = median_blur.copy()
+    opening = cv2.morphologyEx(dilate_img, cv2.MORPH_OPEN, kernel)
 
-    for cntr in contours[0]:
-        x,y,w,h = cv2.boundingRect(cntr)
-        cv2.rectangle(result, (x, y), (x+w, y+h), (255, 255, 255), 2)
+    thresh = cv2.threshold(median_blur, 25, 110, cv2.THRESH_BINARY)[1]
+    cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
+    cnts = cnts[0:2]
 
-    cv2.imshow('frame diff ', im_with_keypoints) 
+    for c in cnts:
+        # Highlight largest contour
+        cv2.drawContours(thresh, [c], -1, (255,0,0), 3)
+
+    cv2.imshow('frame diff ', thresh) 
     cv2.waitKey(0) 
     i = i+1
 

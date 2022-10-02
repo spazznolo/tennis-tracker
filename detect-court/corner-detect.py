@@ -5,21 +5,10 @@ import cv2
 from skimage.feature import (corner_harris, corner_subpix, corner_peaks, plot_matches)
 
 # load the image
-img = cv2.imread("assets/game-frames/grass-w-2019.mp4/frame_28_1400.jpg")
-#img = cv2.imread("assets/chunk_0/frame_1173.jpg")
+img = cv2.imread("assets/game-frames/hard-m-2019-128-800.jpg")
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-edges = cv2.Canny(gray,50,100,apertureSize = 3)
-
-hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-# define range of white color in HSV
-# change it according to your need !
-lower_white = np.array([0,0,250], dtype=np.uint8)
-upper_white = np.array([255,255,255], dtype=np.uint8)
-
-# Threshold the HSV image to get only white colors
-mask = cv2.inRange(hsv, lower_white, upper_white)
-
-dst = cv2.cornerHarris(edges, 8, 29, 0.2)
+edges = cv2.Canny(gray,0,100,apertureSize = 3)
+dst = cv2.cornerHarris(edges, 2, 11, 0.2)
 
 #result is dilated for marking the corners, not important
 dst = cv2.dilate(dst, None)
