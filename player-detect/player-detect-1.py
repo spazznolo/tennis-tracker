@@ -26,7 +26,7 @@ while i < 430:
     current_frame_gray = cv2.cvtColor(current_frame, cv2.COLOR_BGR2GRAY)
     previous_frame_gray = cv2.cvtColor(previous_frame, cv2.COLOR_BGR2GRAY)    
     frame_diff = cv2.absdiff(current_frame_gray, previous_frame_gray)
-
+    #frame_diff = frame_diff[50:150, 250:450]
     # current_blur_gray = cv2.GaussianBlur(current_frame_gray,(kernel_size, kernel_size),0)
     # previous_blur_gray = cv2.GaussianBlur(previous_frame_gray,(kernel_size, kernel_size),0)
     # frame_diff = cv2.absdiff(current_blur_gray, previous_blur_gray)
@@ -34,44 +34,28 @@ while i < 430:
     
     dilate_img = cv2.dilate(frame_diff, kernel_dilate, iterations=3)
     closing = cv2.morphologyEx(dilate_img, cv2.MORPH_OPEN, kernel_open)
-    median_blur = cv2.medianBlur(closing, 3)
-    
-    # Set up the detector with default parameters.
-    params = cv2.SimpleBlobDetector_Params()
+    median_blur = cv2.medianBlur(closing, 1)
 
-    params.filterByColor = 1
-    params.blobColor = 255
+    blur = cv2.GaussianBlur(frame_diff,(5,5),0)
+    new_thresh = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
-    # params.minThreshold = 20
-    # params.maxThreshold = 50
-
-    params.filterByArea = True
-    params.minArea = 10
-
-    params.filterByCircularity = True
-    params.minCircularity = 0.20
-
-    params.filterByInertia = True
-    params.minInertiaRatio = 0.08
-
-    params.filterByConvexity = True
-    params.minConvexity = 0.2
-
-    #params.minDistBetweenBlobs = 100
-
-    detector = cv2.SimpleBlobDetector_create(params)
-    keypoints = detector.detect(closing)
-    im_with_keypoints = cv2.drawKeypoints(closing, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    
-    opening = cv2.morphologyEx(dilate_img, cv2.MORPH_OPEN, kernel)
-
-    thresh = cv2.threshold(median_blur, 25, 110, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(median_blur, 20, 120, cv2.THRESH_BINARY)[1]
+    thresh1 = cv2.adaptiveThreshold(median_blur, 200, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
     cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
-    cnts = cnts[0:2]
+    cnts_sizes = [cv2.contourArea(contour) for contour in cnts]
 
+    new_cnts = []
     for c in cnts:
+        if cv2.contourArea(c) < 5000 and cv2.contourArea(c) > 400:
+            new_cnts.append(c)
+
+    new_cnts = new_cnts[0:2]
+
+    print(new_cnts)
+
+    for c in new_cnts:
         # Highlight largest contour
         cv2.drawContours(thresh, [c], -1, (255,0,0), 3)
 
