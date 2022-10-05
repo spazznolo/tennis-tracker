@@ -12,7 +12,7 @@ kernel_dilate = np.ones((1, 1), 'uint8')
 kernel = np.ones((5, 5), 'uint8')
 
 # load the image
-img = cv2.imread("assets/game-frames/hard-m-2019-128-800.jpg")
+img = cv2.imread("assets/game-frames/hard-w-2020-82-450.jpg")
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 blur_gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)
 edges = cv2.Canny(blur_gray, 0, 100, apertureSize = 3)
@@ -71,14 +71,52 @@ bottom_lines = bottom_lines[(bottom_lines['x_max'] < x_max + width_error) & (bot
 top_lines = widthwise_lines[(widthwise_lines['y_min'] < y_min + height_error) & (widthwise_lines['y_min'] > y_min - height_error)]
 top_lines = top_lines[(top_lines['x_max'] < x_max + width_error) & (top_lines['x_min'] > x_min - width_error)]
 
-cv2.line(img, (int(-l_left['b'].median()/l_left['slope'].median()), int(0)), (int((854-l_left['b'].median())/l_left['slope'].median()), int(854)), (0, 255, 0), 2)
-cv2.line(img, (int(-l_right['b'].median()/l_right['slope'].median()), int(0)), (int((854-l_right['b'].median())/l_right['slope'].median()), int(854)), (0, 255, 0), 2)
+l_left_b = l_left['b'].median()
+l_left_m = l_left['slope'].median()
 
-cv2.line(img, (int(0), int(bottom_lines['b'].median())), (int(854), int(bottom_lines['b'].median() + (bottom_lines['y1'].median()*bottom_lines['slope'].median()))), (0, 255, 0), 2)
-cv2.line(img, (int(0), int(top_lines['b'].median())), (int(854), int(top_lines['b'].median() + (top_lines['y1'].median()*top_lines['slope'].median()))), (0, 255, 0), 2)
+l_right_b = l_right['b'].median()
+l_right_m = l_right['slope'].median()
+
+bottom_lines_b = bottom_lines['b'].median()
+bottom_lines_m = bottom_lines['slope'].median()
+
+top_lines_b = top_lines['b'].median()
+top_lines_m = top_lines['slope'].median()
+
+cv2.line(img, (int(-l_left_b/l_left_m), int(0)), (int((854-l_left_b)/l_left_m), int(854)), (0, 255, 0), 2)
+cv2.line(img, (int(-l_right_b/l_right_m), int(0)), (int((854-l_right_b)/l_right_m), int(854)), (0, 255, 0), 2)
+
+cv2.line(img, (int(0), int(bottom_lines_b)), (int(854), int(bottom_lines_b + (bottom_lines['y1'].median()*bottom_lines_m))), (0, 255, 0), 2)
+cv2.line(img, (int(0), int(top_lines_b)), (int(854), int(top_lines_b + (top_lines['y1'].median()*top_lines_m))), (0, 255, 0), 2)
 
 
-#lines_df.to_csv('assets/temp/hough_lines.csv')
+def line_intersect(m1, b1, m2, b2):
+
+    if m1 == m2:
+        print ("These lines are parallel!!!")
+        return None
+
+    x = int((b2 - b1) / (m1 - m2))
+
+    y = int(m1 * x + b1)
+    return x,y
+
+int_pt1 = line_intersect(l_left_m, l_left_b, bottom_lines_m, bottom_lines_b)
+int_pt2 = line_intersect(l_right_m, l_right_b, bottom_lines_m, bottom_lines_b)
+int_pt3 = line_intersect(l_left_m, l_left_b, top_lines_m, top_lines_b)
+int_pt4 = line_intersect(l_right_m, l_right_b, top_lines_m, top_lines_b)
+print(int_pt1)
+print(int_pt2)
+print(int_pt3)
+print(int_pt4)
+cv2.circle(img, int_pt1, 1, (255, 0, 0), -1)
+cv2.circle(img, int_pt2, 1, (255, 0, 0), -1)
+cv2.circle(img, int_pt3, 1, (255, 0, 0), -1)
+cv2.circle(img, int_pt4, 1, (255, 0, 0), -1)
+
 cv2.imwrite('/Users/ada/Documents/projects/spazznolo.github.io/figs/hough-line-ex-4.jpg',img)
 cv2.imshow("Detected Lines (in red) - Standard Hough Line Transform", img)
 cv2.waitKey(0)
+
+
+

@@ -55,14 +55,29 @@ while i < 1130:
         extTop = tuple(c[c[:, :, 1].argmin()][0])
         extBot = tuple(c[c[:, :, 1].argmax()][0])
 
-        if cv2.contourArea(c) < 7000 and cv2.contourArea(c) > 400 and (abs(extLeft[0] - extRight[0]) < abs(extTop[1] - extBot[1])):
+        if extLeft[0] > 150 and extRight[0] < 700 and extBot[1] < 250 and cv2.contourArea(c) < 4000 and cv2.contourArea(c) > 1000 and (abs(extLeft[0] - extRight[0]) < abs(extTop[1] - extBot[1])):
             new_cnts.append(c)
 
-    new_cnts = new_cnts[0:1]
+    new_cnts = new_cnts[0:5]
+
+    dist_to_center = 1000
+
+    # for c in new_cnts:
+    #     # Highlight largest contour
+    #     M = cv2.moments(c)
+    #     cX = int(M["m10"] / M["m00"])
+    #     cY = int(M["m01"] / M["m00"])
+
+    #     if np.sqrt((cX - 400)^2 + (cY - 120)^2) < dist_to_center:
+    #         dist_to_center = np.sqrt((cX - 400)^2 + (cY - 120)^2)
+    #         d = c
+
+    # cv2.circle(thresh, (400, 120), 10, (255, 255, 255), -1)
+    # cv2.circle(thresh, tuple(d[d[:, :, 1].argmax()][0]), 10, (0, 255, 0), -1)
+    # cv2.drawContours(thresh, [d], -1, (255,0,0), 3)
 
     for c in new_cnts:
         # Highlight largest contour
-        #print(tuple(c[c[:, :, 1].argmax()][0]))
         cv2.circle(current_frame, tuple(c[c[:, :, 1].argmax()][0]), 10, (0, 255, 0), -1)
         cv2.drawContours(current_frame, [c], -1, (255,0,0), 3)
 
