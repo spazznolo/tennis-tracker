@@ -7,9 +7,9 @@ import time
 start_time = time.time()
 
 game = "assets/game-frames/hard-w-2022-70-" 
-far_locations = pd.read_csv('far_location_clean.csv')
-close_locations = pd.read_csv('close_location_clean.csv')
-court_coords = pd.read_csv('court_coords_clean.csv')
+far_locations = pd.read_csv('assets/demo/far_location_clean.csv')
+close_locations = pd.read_csv('assets/demo/close_location_clean.csv')
+court_coords = pd.read_csv('assets/demo/court_coords_clean.csv')
 
 # load the image
 i = 210
