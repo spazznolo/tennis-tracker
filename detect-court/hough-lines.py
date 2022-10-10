@@ -10,7 +10,7 @@ height_error = 10
 kernel_size = 1
 
 # load the image
-img = cv2.imread("assets/game-frames/hard-m-2019-128-740.jpg")
+img = cv2.imread("assets/game-frames/hard-w-2022-89-1100.jpg")
 print(img.shape)
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 blur_gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)

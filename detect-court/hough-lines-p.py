@@ -12,7 +12,7 @@ kernel_dilate = np.ones((1, 1), 'uint8')
 kernel = np.ones((5, 5), 'uint8')
 
 # load the image
-img = cv2.imread("assets/game-frames/hard-w-2020-82-450.jpg")
+img = cv2.imread("assets/game-frames/hard-w-2022-67-1320.jpg")
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 blur_gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)
 edges = cv2.Canny(blur_gray, 0, 100, apertureSize = 3)
@@ -29,7 +29,7 @@ lines_df['slope'] = (lines_df['y2'] - lines_df['y1'])/(lines_df['x2'] - lines_df
 lines_df['abs_slope'] = abs(lines_df['slope'])
 lines_df['length'] = np.sqrt(((lines_df['y_max'] - lines_df['y_min'])**2) + ((lines_df['x_max'] - lines_df['x_min'])**2))
 
-lengthwise_lines = lines_df[(lines_df['abs_slope'] > 1.00) & (lines_df['abs_slope'] < 3.5) & (lines_df['length'] > 100)]
+lengthwise_lines = lines_df[(lines_df['abs_slope'] > 1.20) & (lines_df['abs_slope'] < 3.5) & (lines_df['length'] > 100)]
 
 if len(lengthwise_lines.index) == 0:
     print('No lengthwise lines!')
@@ -39,7 +39,7 @@ ward = AgglomerativeClustering(n_clusters = None, distance_threshold = 0.50, lin
 lengthwise_lines['clust'] = ward.labels_
 
 want_clusts = lengthwise_lines['clust'].value_counts()[:2].index.tolist()
-
+print(lengthwise_lines)
 lengthwise_lines = lengthwise_lines[lengthwise_lines['clust'].isin(want_clusts)]
 
 ward = AgglomerativeClustering(n_clusters = None, distance_threshold = 10, linkage = "ward").fit(lengthwise_lines[['y_min']])
@@ -82,13 +82,6 @@ bottom_lines_m = bottom_lines['slope'].median()
 
 top_lines_b = top_lines['b'].median()
 top_lines_m = top_lines['slope'].median()
-
-cv2.line(img, (int(-l_left_b/l_left_m), int(0)), (int((854-l_left_b)/l_left_m), int(854)), (0, 255, 0), 2)
-cv2.line(img, (int(-l_right_b/l_right_m), int(0)), (int((854-l_right_b)/l_right_m), int(854)), (0, 255, 0), 2)
-
-cv2.line(img, (int(0), int(bottom_lines_b)), (int(854), int(bottom_lines_b + (bottom_lines['y1'].median()*bottom_lines_m))), (0, 255, 0), 2)
-cv2.line(img, (int(0), int(top_lines_b)), (int(854), int(top_lines_b + (top_lines['y1'].median()*top_lines_m))), (0, 255, 0), 2)
-
 
 def line_intersect(m1, b1, m2, b2):
 

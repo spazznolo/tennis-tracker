@@ -1,0 +1,14 @@
+
+notes:
+time everything
+write failures + why they happen
+iterate through solutions
+improve both detection + imputation
+write imputation process in python
+
+steps:
+1. create directory for hard-w-2022 game
+2. create one script for court detection, player detection
+3. save all locations
+4. impute locations
+5. visualize locations
