@@ -11,15 +11,13 @@ kernel = np.ones((3, 3), 'uint8')
 kernel_open = np.ones((3, 3), 'uint8')
 fgbg = cv2.createBackgroundSubtractorMOG2(history=5, detectShadows=True)
 
-game = "assets/game-frames/hard-w-2022-70-"
+game = "assets/game-frames/hard-w-2022-52-"
 
 loc_df = pd.DataFrame(columns=['frame', 'x_far', 'y_far'])
-far_cleaned_locations = pd.read_csv('far_location_clean.csv')
-close_cleaned_locations = pd.read_csv('close_location_clean.csv')
 
-i = 210
+i = 855
 
-while i < 526:
+while i < 950:
     
     current_frame = cv2.imread(str(game) + str(i) + ".jpg")
     previous_frame = cv2.imread(str(game) + str(i-1) + ".jpg")

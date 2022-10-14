@@ -31,6 +31,8 @@ if lines is not None:
         slope = ((y0 + 1000*(a)) - (y0 - 1000*(a)))/((x0 + 1000*(-b)) - (x0 - 1000*(-b)))
         if abs(slope) > 1 and abs(slope) < 3:
             cv2.line(img, pt1, pt2, (0,0,255), 1, cv2.LINE_AA)
+        # if abs(slope) < 0.1:
+        #     cv2.line(img, pt1, pt2, (0,0,255), 1, cv2.LINE_AA)
 
 cv2.imshow("Detected Lines (in red) - Standard Hough Line Transform", img)
 cv2.waitKey(0)

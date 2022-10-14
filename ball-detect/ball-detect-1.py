@@ -11,10 +11,10 @@ kernel_open = np.ones((3, 3), 'uint8')
 kernel_b = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
 fgbg = cv2.createBackgroundSubtractorMOG2()
 
-game = "assets/game-frames/hard-w-2020-70-" # 800-850
+game = "assets/game-frames/hard-m-2019-128-" # 800-850
 
-i = 300
-while i < 500:
+i = 800
+while i < 890:
     
     current_frame = cv2.imread(str(game) + str(i) + ".jpg")
     previous_frame = cv2.imread(str(game) + str(i-1) + ".jpg")

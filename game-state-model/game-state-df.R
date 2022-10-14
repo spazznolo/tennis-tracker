@@ -165,8 +165,6 @@ game_state_df_2 <-
       game_chunk == 'hard-w-2022-123' & frame_number %in% c(0:135, 1392:1408) ~ 1,
       
       
-      
-      
       TRUE ~ 0
       )
     ) %>%
@@ -207,7 +205,28 @@ for (i in 1:nrow(game_state_df_2)) {
   
 }
 
+game_state_df_3 <-
+  game_state_df_2 %>%
+  filter(grepl('hard-m-2019', game_chunk), game_state == 'on') %>%
+  separate(game_chunk, c('type', 'sex', 'year', 'game_chunk')) %>%
+  mutate(game_chunk_l = str_pad(game_chunk, 3, pad = '0'), frame_number_l = str_pad(frame_number, 4, pad = '0'))
 
+unlink("~/Documents/tennis-tracker/assets/demo/all-frames", recursive = TRUE)
+dir.create(paste0("~/Documents/tennis-tracker/assets/demo/all-frames"), recursive=TRUE)
+
+for (i in 1:nrow(game_state_df_3)) {
+  
+  frame_number_ <- game_state_df_3 %>% slice(i) %>% pull(frame_number)
+  game_chunk_ <- game_state_df_3 %>% slice(i) %>% pull(game_chunk)
+  frame_number_l <- game_state_df_3 %>% slice(i) %>% pull(frame_number_l)
+  game_chunk_l <- game_state_df_3 %>% slice(i) %>% pull(game_chunk_l)
+  
+  file.copy(
+    from = paste0("~/Documents/tennis-tracker/assets/game-frames/hard-m-2019-", game_chunk_, '-', frame_number_, '.jpg'),
+    to = paste0("~/Documents/tennis-tracker/assets/demo/all-frames/hard-m-2019-", game_chunk_l, '-', frame_number_l, '.jpg')
+  )
+  
+}
 
 
 

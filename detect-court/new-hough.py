@@ -15,11 +15,12 @@ kernel = np.ones((5, 5), 'uint8')
 
 court_coords = np.zeros(shape=(316, 9))
 
-i = 210
+i = 301
 
-while i < 526:
+while i < 310:
+    i+=1
+    img = cv2.imread("assets/demo/all-frames/hard-m-2019-036-0" + str(i) + ".jpg")
 
-    img = cv2.imread("assets/game-frames/hard-w-2022-70-" + str(i) + ".jpg")
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     blur_gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)
     edges = cv2.Canny(blur_gray, 0, 100, apertureSize = 3)
@@ -53,8 +54,6 @@ while i < 526:
     y_ext1 = np.median(y_coords[np.isin(ward.labels_, want_clusts[0])])
     y_ext2 = np.median(y_coords[np.isin(ward.labels_, want_clusts[1])])
 
-    # # # bottle-neck: takes 0.100 real-time
-
     length_want = ward_length.labels_[np.isin(ward_length.labels_, length_clusts)][np.argmin(abs(lengthwise_lines[:,4]))]
     lengthwise_lines = lengthwise_lines[lengthwise_lines[:, 6] == length_want]
     lengthwise_lines = np.c_[lengthwise_lines, (lengthwise_lines[:,1] - (lengthwise_lines[:,4]*lengthwise_lines[:,0]))]
@@ -65,23 +64,43 @@ while i < 526:
     y_max = max(y_ext1, y_ext2)
     y_min = min(y_ext1, y_ext2)
 
-    widthwise_lines = lines_np[(abs(lines_np[:, 4]) < 0.10)]
+    widthwise_lines = lines_np[(abs(lines_np[:, 4]) < 0.20)]
     widthwise_lines = np.c_[widthwise_lines, (widthwise_lines[:,1] - (widthwise_lines[:,4]*widthwise_lines[:,0]))]
 
     bottom_lines = widthwise_lines[np.where((np.amin(widthwise_lines[:,[1,3]], axis = 1) >= y_min - height_error) & (np.amin(widthwise_lines[:,[1,3]], axis = 1) <= y_min + height_error) & (np.amin(widthwise_lines[:,[0,2]], axis = 1) >= x_min - width_error) & (np.amax(widthwise_lines[:,[0,2]], axis = 1) <= x_max + width_error))[0]]
     top_lines = widthwise_lines[np.where((np.amax(widthwise_lines[:,[1,3]], axis = 1) >= y_max - height_error) & (np.amax(widthwise_lines[:,[1,3]], axis = 1) <= y_max + height_error) & (np.amin(widthwise_lines[:,[0,2]], axis = 1) >= x_min - width_error) & (np.amax(widthwise_lines[:,[0,2]], axis = 1) <= x_max + width_error))[0]]
+    print(top_lines.size)
+     
+    if top_lines.size == 0 or bottom_lines.size == 0 or l_left.size == 0 or l_right.size == 0:
+        print('Nope!')
+        continue
 
     l_left_b = np.median(l_left[:,7])
     l_left_m = np.median(l_left[:,4])
+    cv2.line(img, (int(-l_left_b/l_left_m), 0), (int((480 - l_left_b)/l_left_m), 480), (0,255,255), 1, cv2.LINE_AA)
 
     l_right_b = np.median(l_right[:,7])
     l_right_m = np.median(l_right[:,4])
-
-    bottom_lines_b = np.median(bottom_lines[:,6])
-    bottom_lines_m = np.median(bottom_lines[:,4])
+    cv2.line(img, (int(-l_right_b/l_right_m), 0), (int((480 - l_right_b)/l_right_m), 480), (0,255,255), 1, cv2.LINE_AA)
 
     top_lines_b = np.median(top_lines[:,6])
     top_lines_m = np.median(top_lines[:,4])
+    cv2.line(img, (0, int(top_lines_b)), (854, int((854*top_lines_m) + top_lines_b)), (0,255,255), 1, cv2.LINE_AA)
+
+    bottom_lines_m = np.median(bottom_lines[:,4])
+    bottom_lines_b = np.median(bottom_lines[:,6])
+
+    if top_lines_m == 0: 
+        bottom_lines_m = 0
+
+    if bottom_lines_m == 0: 
+        bottom_lines_b = np.median(bottom_lines[:,3])
+
+    print(top_lines_m, l_right_m, l_left_m, bottom_lines_m)
+    cv2.line(img, (0, int(bottom_lines_b)), (854, int((854*bottom_lines_m) + bottom_lines_b)), (0,255,255), 1, cv2.LINE_AA)
+
+    cv2.imshow("Detected Lines (in red) - Standard Hough Line Transform", img)
+    cv2.waitKey(0)
 
     def line_intersect(m1, b1, m2, b2):
 
@@ -102,9 +121,7 @@ while i < 526:
 
     court_coords[i-210] = [i] + int_pt1 + int_pt2 + int_pt3 + int_pt4
 
-    i+=1
+#pd.DataFrame(court_coords, columns = ['frame', 'x_1', 'y_1', 'x_2', 'y_2', 'x_3', 'y_3', 'x_4', 'y_4']).to_csv('assets/demo/court_coords.csv', index = False)
 
-pd.DataFrame(court_coords, columns = ['frame', 'x_1', 'y_1', 'x_2', 'y_2', 'x_3', 'y_3', 'x_4', 'y_4']).to_csv('court_coords.csv', index = False)
-
-print("--- %s seconds ---" % (time.time() - start_time))
+#print("--- %s seconds ---" % (time.time() - start_time))
 
